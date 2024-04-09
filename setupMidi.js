@@ -6,7 +6,7 @@ BPROG = 0;
 const FMIDI = { BEAT: 0, BAR: 0, CLOCK: -1 };
 let midimessages = [];
 let onCBeat = false;
-
+LED_HIJINX = false;
 let onCBar = false;
 let onCHalfBeat = false;
 
@@ -133,8 +133,6 @@ const INVERSE_LIGHT_MAP = Object.fromEntries(
   Object.entries(NOVATION_NOTE_TO_KNOB).map(([key, value]) => [value, key])
 );
 
-const BEAT_DETECTION_NOTE = 26;
-
 // AKAI MIDIMIX
 // names for buttons for easier use
 /**
@@ -159,7 +157,7 @@ const AKAI_BUTTON_MAP = {
   21: "D7",
   24: "D8",
   25: "BANK_LEFT",
-  [BEAT_DETECTION_NOTE]: "BEAT_DETECTION",
+  26: "BEAT_DETECTION",
 };
 
 // LAUNCH CONTROL
@@ -181,6 +179,7 @@ const BUTTON_MAP_LC = {
   58: "C6",
   59: "C7",
   60: "C8",
+  105: "BEAT_DETECTION",
 };
 
 /** Saved to localstorage to persist over sketch reset */
@@ -216,6 +215,9 @@ const CONFIG_BUTTONS = Object.entries(currentDevice.buttons)
   .filter(Boolean);
 const BUTTON_MAP = currentDevice.buttons;
 const MIDI_VALUES = currentDevice.valueMap;
+const BEAT_DETECTION_KEY = Object.keys(BUTTON_MAP).find(
+  (key) => BUTTON_MAP[key] === "BEAT_DETECTION"
+);
 const INVERTED_MAP = Object.fromEntries(
   Object.entries(MIDI_VALUES).map(([key, value]) => [value, key])
 );
@@ -239,7 +241,7 @@ let getMidiValue = (num, max, def) => {
   return map(val, 0, 127, 0, max);
 };
 
-let getMidiValueMin = (num, max, def, min) => {
+let getMidiValueMin = (num, max, def, min = 0) => {
   val = midiValues[MIDI_VALUES[num]];
   if (val === 0) return min;
   if (val === undefined) return def;
@@ -272,7 +274,8 @@ function controlChange(control) {
   midiValues[control.controllerNumber] = control.value;
 
   const ccLightNumber = INVERSE_LIGHT_MAP[control.controllerNumber];
-  ccLightNumber &&
+  LED_HIJINX &&
+    ccLightNumber &&
     midiOutput.playNote(ccLightNumber, "all", {
       velocity: control.value / 127,
     });
@@ -343,7 +346,10 @@ function noteOn(note) {
     return setMidiPreset(note.number);
   }
   const name = getMidiButtonName(note.number);
-  if (!name) return;
+
+  if (!name) {
+    console.log(`No name found for key ${note.number}`);
+  }
 
   if (name === "SOLO") {
     initLights();

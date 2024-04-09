@@ -22,7 +22,7 @@ p5.prototype.getOrPersistFromLocalStorage = (key, value) => {
 
 let getFromLocalStorageOrDefaultTo = (key, defaultTo) => {
   value = localStorage.getItem(key);
-  if (R.isNil(value)) {
+  if (value === null || value === undefined) {
     setToLocalStorage(key, defaultTo);
     return defaultTo;
   }

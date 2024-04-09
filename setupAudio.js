@@ -1,3 +1,4 @@
+/** Adapted from ted davis libs */
 /** Use midi clock beat instead of BeatDetektor */
 MIDI_BEAT_MODE = false;
 
@@ -126,9 +127,9 @@ p5.prototype.updateAudio = function (ampMulti) {
   beat_counter_helper = beatCount;
 
   const beatDetectionOn = C.isBeatDetectionOn;
-  // midiOutput?.playNote(BEAT_DETECTION_NOTE, "all", {
-  //   velocity: beatDetectionOn * onBeat,
-  // });
+  midiOutput?.playNote(BEAT_DETECTION_KEY, "all", {
+    velocity: beatCount % 2 === 0 ? 1 : 0,
+  });
   if (!beatDetectionOn) {
     beatCount = 0;
     onBeat = false;
