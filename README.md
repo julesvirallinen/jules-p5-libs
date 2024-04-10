@@ -79,3 +79,7 @@ function draw() {
 
 }```
 ````
+
+Notes:
+
+- some stuff used to use ramda, might need to be loaded still
